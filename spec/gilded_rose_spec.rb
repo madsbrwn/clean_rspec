@@ -105,25 +105,6 @@ RSpec.describe GildedRose do
     end
   end
 
-
-
-  shared_examples :gilded_rose do |name, days_remaining, quality, expected_days_remaining, expected_quality|
-    it 'ticks' do
-      gr = GildedRose.new(name: name, days_remaining: days_remaining, quality: quality)
-
-      gr.tick
-      expect(gr).to have_attributes(days_remaining: expected_days_remaining, quality: expected_quality)
-    end
-  end
-
-  it_behaves_like :gilded_rose, "Aged Brie", 5, 10, 4, 11
-  it_behaves_like :gilded_rose, "Aged Brie", 5, 50, 4, 50
-  it_behaves_like :gilded_rose, "Aged Brie", 0, 10, -1, 12
-  it_behaves_like :gilded_rose, "Aged Brie", 0, 49, -1, 50
-  it_behaves_like :gilded_rose, "Aged Brie", 0, 50, -1, 50
-  it_behaves_like :gilded_rose, "Aged Brie", -10, 10, -11, 12
-  it_behaves_like :gilded_rose, "Aged Brie", -10, 50, -11, 50
-
   it "sulfuras before sell date" do
     gr = GildedRose.new(name: "Sulfuras, Hand of Ragnaros", days_remaining: 5, quality: 80)
 
