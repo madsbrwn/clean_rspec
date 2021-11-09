@@ -9,18 +9,9 @@ RSpec.describe GildedRose do
     expect(gilded_rose).to be_a(GildedRose)
   end
 
-  shared_examples :gilded_rose do |name, days_remaining, quality, expected_days_remaining, expected_quality|
-    it 'ticks' do
-      gr = GildedRose.new(name: name, days_remaining: days_remaining, quality: quality)
-
-      gr.tick
-      expect(gr).to have_attributes(days_remaining: expected_days_remaining, quality: expected_quality)
-    end
-  end
-
   describe '#tick' do
     context 'normal item after sell date' do
-      gr = GildedRose.new(name: "Normal Item", days_remaining: -10, quality: 10)
+      let(:gr) { GildedRose.new(name: "Normal Item", days_remaining: -10, quality: 10) }
 
       it 'decreases the quality by 2' do
         gr.tick
@@ -29,7 +20,7 @@ RSpec.describe GildedRose do
     end
 
     context "normal item before sell date" do
-      gr = GildedRose.new(name: "Normal Item", days_remaining: 5, quality: 10)
+      let(:gr) { GildedRose.new(name: "Normal Item", days_remaining: 5, quality: 10) }
 
       it 'decreases the quality by 1' do
         gr.tick
@@ -46,11 +37,82 @@ RSpec.describe GildedRose do
     end
 
     context "normal item of zero quality" do
-      gr = GildedRose.new(name: name, days_remaining: 5, quality: 0)
+      let(:gr) { GildedRose.new(name: name, days_remaining: 5, quality: 0) }
       it 'does not decrease the quality' do
         gr.tick
         expect(gr).to have_attributes(days_remaining: 4, quality: 0)
       end
+    end
+
+    context 'aged brie' do
+      context 'before sell date' do
+        context 'low quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: 5, quality: 10) }
+          it 'increases the quality by 1' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: 4, quality: 11)
+          end
+        end
+        context 'max quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: 5, quality: 50) }
+          it 'does not increase the quality' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: 4, quality: 50)
+          end
+        end
+      end
+
+      context 'on sell date' do
+        context 'low quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: 0, quality: 10) }
+          it 'increases the quality by 2' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: -1, quality: 12)
+          end
+        end
+        context 'high quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: 0, quality: 49) }
+          it 'increases the quality by 1' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: -1, quality: 50)
+          end
+        end
+        context 'max quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: 0, quality: 50) }
+          it 'does not increase the quality' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: -1, quality: 50)
+          end
+        end
+      end
+
+      context 'after sell date' do
+        context 'low quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: -10, quality: 10) }
+          it 'increases the quality by 2' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: -11, quality: 12)
+          end
+        end
+        context 'max quality' do
+          let(:gr) { GildedRose.new(name: "Aged Brie", days_remaining: -10, quality: 50) }
+          it 'does not increase the quality' do
+            gr.tick
+            expect(gr).to have_attributes(days_remaining: -11, quality: 50)
+          end
+        end
+      end
+    end
+  end
+
+
+
+  shared_examples :gilded_rose do |name, days_remaining, quality, expected_days_remaining, expected_quality|
+    it 'ticks' do
+      gr = GildedRose.new(name: name, days_remaining: days_remaining, quality: quality)
+
+      gr.tick
+      expect(gr).to have_attributes(days_remaining: expected_days_remaining, quality: expected_quality)
     end
   end
 
