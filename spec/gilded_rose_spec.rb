@@ -9,55 +9,49 @@ RSpec.describe GildedRose do
     expect(gilded_rose).to be_a(GildedRose)
   end
 
-  describe '#tick' do
-    context 'when a normal item has passed its sell date' do
-      it 'decreases the quality' do
-        gr = GildedRose.new(name: "Normal Item", days_remaining: -10, quality: 10)
-
-        gr.tick
-
-        expect(gr.days_remaining).to eq(-11)
-        expect(gr.quality).to eq(8)
-      end
-    end
-  end
-
   shared_examples :gilded_rose do |name, days_remaining, quality, expected_days_remaining, expected_quality|
     it 'ticks' do
       gr = GildedRose.new(name: name, days_remaining: days_remaining, quality: quality)
+
       gr.tick
       expect(gr).to have_attributes(days_remaining: expected_days_remaining, quality: expected_quality)
     end
   end
 
-  it "normal item before sell date" do
-    gr = GildedRose.new(name: "Normal Item", days_remaining: 5, quality: 10)
-    gr2 = GildedRose.new(name: "Normal Item", days_remaining: -1, quality: 8)
-    gr3 = GildedRose.new(name: "Normal Item", days_remaining: 1, quality: 12)
+  describe '#tick' do
+    context 'normal item after sell date' do
+      gr = GildedRose.new(name: "Normal Item", days_remaining: -10, quality: 10)
 
-    gr.tick
+      it 'decreases the quality by 2' do
+        gr.tick
+        expect(gr).to have_attributes(days_remaining: -11, quality: 8)
+      end
+    end
 
-    expect(gr).to have_attributes(days_remaining: 4, quality: 9)
-  end
+    context "normal item before sell date" do
+      gr = GildedRose.new(name: "Normal Item", days_remaining: 5, quality: 10)
 
-  it "normal item on sell date" do
-    gr = GildedRose.new(name: "Normal Item", days_remaining: 0, quality: 10)
+      it 'decreases the quality by 1' do
+        gr.tick
+        expect(gr).to have_attributes(days_remaining: 4, quality: 9)
+      end
+    end
 
-    expect(gr).to be_instance_of(GildedRose)
+    context "normal item on sell date" do
+      let(:gr) { GildedRose.new(name: "Normal Item", days_remaining: 0, quality: 10) }
+      it 'decreases the quality by 2' do
+        gr.tick
+        expect(gr).to have_attributes(days_remaining: -1, quality: 8)
+      end
+    end
 
-    gr.tick
-
-    expect(gr.days_remaining).to eq(-1)
-    expect(gr.quality).to eq(8)
-  end
-
-  it "normal item of zero quality" do
-    gr = GildedRose.new(name: name, days_remaining: 5, quality: 0)
-
-    gr.tick
-
-    expect(gr.days_remaining).to eq(4)
-    expect(gr.quality).to eq(0)
+    context "normal item of zero quality" do
+      gr = GildedRose.new(name: name, days_remaining: 5, quality: 0)
+      it 'does not decrease the quality' do
+        gr.tick
+        expect(gr).to have_attributes(days_remaining: 4, quality: 0)
+      end
+    end
   end
 
   it_behaves_like :gilded_rose, "Aged Brie", 5, 10, 4, 11
